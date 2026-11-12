@@ -1,0 +1,13 @@
+{
+  "appId": "com.floria.cycle",
+  "appName": "Floria",
+  "webDir": "mobile-www",
+  "android": {
+    "allowMixedContent": false
+  },
+  "plugins": {
+    "LocalNotifications": {
+      "iconColor": "#d81b60"
+    }
+  }
+}
