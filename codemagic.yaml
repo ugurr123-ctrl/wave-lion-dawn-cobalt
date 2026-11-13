@@ -1,0 +1,22 @@
+workflows:
+  floria-ios:
+    name: Floria iOS
+    instance_type: mac_mini_m2
+    environment:
+      xcode: latest
+      node: 24
+      ios_signing:
+        distribution_type: app_store
+        bundle_identifier: com.floria.cycle
+    scripts:
+      - name: Prepare Capacitor
+        script: |
+          npm ci
+          npm run build:ios
+      - name: Sign and build IPA
+        script: |
+          xcode-project use-profiles --project ios/App/App.xcodeproj
+          xcode-project build-ipa --project ios/App/App.xcodeproj --scheme App
+    artifacts:
+      - build/ios/ipa/*.ipa
+      - /tmp/xcodebuild_logs/*.log
