@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { FREE_LINE, formatUntil, isPremiumActive, planName, PREMIUM_INCLUDES, PREMIUM_PLANS, purchasePlan, readReceipt, restorePlan } from '../premium';
+import { DEMO_PURCHASES_ENABLED, FREE_LINE, formatUntil, isPremiumActive, planName, PREMIUM_INCLUDES, PREMIUM_PLANS, purchasePlan, readReceipt, restorePlan } from '../premium';
 
 export function PremiumGarden({
   compact = false,
@@ -62,6 +62,7 @@ export function PremiumGarden({
         </ul>
         <p className="mt-3 text-[11px] text-white/75 leading-relaxed">{FREE_LINE}</p>
       </div>
+      {DEMO_PURCHASES_ENABLED && <>
       <div className={`relative mt-4 grid gap-2 ${compact ? 'grid-cols-1' : 'grid-cols-3'}`}>
         {PREMIUM_PLANS.map((plan) => (
           <button
@@ -81,6 +82,8 @@ export function PremiumGarden({
       <button type="button" onClick={restore} className="relative mt-3 w-full text-xs font-semibold underline underline-offset-4 cursor-pointer">
         Satın almayı geri yükle
       </button>
+      </>}
+      {!DEMO_PURCHASES_ENABLED && <p className="relative mt-4 text-center text-sm">Premium alımı şu anda kapalı.</p>}
       {note && <p className="relative mt-2 text-center text-[11px] text-white/85">{note}</p>}
     </div>
   );
@@ -99,7 +102,7 @@ export function PremiumRibbon({ active, onOpen }: { active: boolean; onOpen: () 
   return (
     <button type="button" onClick={onOpen} className="w-full rounded-[24px] bg-white border border-[#f3c3d4] px-4 py-3 text-left cursor-pointer">
       <p className="text-sm font-semibold text-[#4a1230]">👑 Kraliçe planı</p>
-      <p className="text-[11px] text-[#805062] mt-1 leading-relaxed">Rehber ve PDF özeti bu planda. Haftalık 50 TL, aylık 99 TL, yıllık 499 TL.</p>
+      {DEMO_PURCHASES_ENABLED && <p className="text-[11px] text-[#805062] mt-1 leading-relaxed">Rehber ve PDF özeti bu planda. Haftalık 50 TL, aylık 99 TL, yıllık 499 TL.</p>}
       <p className="text-[11px] text-[#805062] mt-1">{FREE_LINE}</p>
     </button>
   );

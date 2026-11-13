@@ -17,14 +17,17 @@ export function AdBanner({ premium, onRemove }: { premium: boolean; onRemove: ()
   }, []);
 
   useEffect(() => {
-    if (hidden) {
+    if (!import.meta.env.DEV || hidden) {
       void hideAdMobBanner();
       setNative(false);
       return;
     }
     let cancel = false;
     void showAdMobBanner().then((ok) => {
+      if (cancel && ok) void hideAdMobBanner();
       if (!cancel) setNative(ok);
+    }).catch(() => {
+      if (!cancel) setNative(false);
     });
     return () => {
       cancel = true;
@@ -32,7 +35,7 @@ export function AdBanner({ premium, onRemove }: { premium: boolean; onRemove: ()
     };
   }, [hidden]);
 
-  if (hidden || native) return null;
+  if (!import.meta.env.DEV || hidden || native) return null;
 
   return (
     <div className="pointer-events-auto mb-2 rounded-2xl border border-[#f0e6e8] bg-white px-3 py-2 shadow-sm flex items-center gap-2">

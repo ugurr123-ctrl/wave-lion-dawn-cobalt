@@ -26,7 +26,7 @@ function makePdf(lines: string[]): string {
   const body = ['BT', '/F1 11 Tf', '48 800 Td', '16 TL'];
   lines.slice(0, 42).forEach((line, index) => {
     const text = pdfText(line || ' ');
-    body.push(index === 0 ? `(${text}) Tj` : `T* (${text}) Tj`);
+    body.push(index === 0 ? `<${text}> Tj` : `T* <${text}> Tj`);
   });
   body.push('ET');
   const stream = body.join('\n');
@@ -35,7 +35,7 @@ function makePdf(lines: string[]): string {
     '2 0 obj << /Type /Pages /Kids [3 0 R] /Count 1 >> endobj',
     '3 0 obj << /Type /Page /Parent 2 0 R /MediaBox [0 0 595 842] /Contents 4 0 R /Resources << /Font << /F1 5 0 R >> >> >> endobj',
     `4 0 obj << /Length ${stream.length} >> stream\n${stream}\nendstream endobj`,
-    '5 0 obj << /Type /Font /Subtype /Type1 /BaseFont /Helvetica >> endobj',
+    '5 0 obj << /Type /Font /Subtype /Type1 /BaseFont /Helvetica /Encoding << /BaseEncoding /WinAnsiEncoding /Differences [1 /Gbreve /Idotaccent /Scedilla /gbreve /dotlessi /scedilla] >> >> endobj',
   ];
   let pdf = '%PDF-1.4\n';
   const offsets = [0];
@@ -115,7 +115,7 @@ Bu özet yalnızca uygulamaya girilen kayıtlardan üretilir. Tıbbi teşhis de�
     document.body.appendChild(link);
     link.click();
     link.remove();
-    URL.revokeObjectURL(url);
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
 
     setDownloadSuccess(true);
     setTimeout(() => setDownloadSuccess(false), 3500);

@@ -149,6 +149,7 @@ export default function App() {
 
   // Day Data Map
   const [dayDataMap, setDayDataMap] = useState<Record<string, DayInfo>>({});
+  const [storageError, setStorageError] = useState(false);
   const [cycles, setCycles] = useState<CycleRecord[]>([]);
 
   useEffect(() => {
@@ -172,8 +173,9 @@ export default function App() {
       localStorage.setItem(STORAGE.days, JSON.stringify(dayDataMap));
       localStorage.setItem(STORAGE.supplements, JSON.stringify(supplements));
       localStorage.setItem(STORAGE.cycles, JSON.stringify(cycles));
+      setStorageError(false);
     } catch {
-      /* storage full or blocked */
+      setStorageError(true);
     }
   }, [profile, dayDataMap, supplements, cycles, ready]);
 
@@ -211,7 +213,7 @@ export default function App() {
 
   useEffect(() => {
     if (!ready) return;
-    const run = () => { void syncReminders(supplements); };
+    const run = () => { void syncReminders(supplements).catch((error) => console.warn("Floria reminders:", error)); };
     run();
     window.addEventListener('floria-notify', run);
     return () => window.removeEventListener('floria-notify', run);
@@ -259,6 +261,15 @@ export default function App() {
   };
 
   const handleResetData = () => {
+    try {
+      for (const key of Object.keys(localStorage)) {
+        if (key.startsWith('flora-') && key !== 'flora-store-receipt') localStorage.removeItem(key);
+      }
+    } catch {
+      showToast('Silme tamamlanamadı', 'Cihaz depolamasına erişilemedi. Lütfen tekrar deneyin.', 'info');
+      return;
+    }
+    setCycles([]);
     setProfile(emptyProfile());
     setDayDataMap({});
     setSupplements([]);
@@ -269,13 +280,7 @@ export default function App() {
     setShowSymptomModal(false);
     setShowWaterSettingsModal(false);
     setShowDoctorReportModal(false);
-    try {
-      for (const key of Object.keys(localStorage)) {
-        if ((key.startsWith('flora-guide-') || key.startsWith('flora-')) && key !== 'flora-store-receipt') localStorage.removeItem(key);
-      }
-    } catch {
-      /* storage unavailable */
-    }
+
     showToast('Temiz bir sayfa', 'Kayıtlar gitti. Yeniden başlamak da olur.', 'info');
   };
 
@@ -416,7 +421,7 @@ export default function App() {
       <div className="relative z-10 max-w-md mx-auto min-h-screen flex flex-col px-4">
         {/* App Header */}
         <Header
-          currentCycleDay={currentDayInfo.cycleDay}
+          currentCycleDay={profile.lastPeriodDate ? currentDayInfo.cycleDay : undefined}
           currentPhaseName={profile.lastPeriodDate ? phaseLabel : 'Kurulum bekleniyor'}
           menuLabel={menuLabel}
           activeTab={activeTab}
@@ -427,6 +432,7 @@ export default function App() {
 
         {/* Dynamic Tab Views */}
         <main className="flex-1">
+          {storageError && <p role="alert" className="my-3 rounded-xl bg-rose-100 p-3 text-sm text-rose-950">Değişiklikler cihazınıza kaydedilemedi. Sayfayı kapatmadan önce depolama alanını ve tarayıcı ayarlarını kontrol edin.</p>}
           {activeTab === 'bugun' && (
             <TodayTab
               currentDayInfo={currentDayInfo}

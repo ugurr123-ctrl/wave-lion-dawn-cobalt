@@ -7,7 +7,7 @@ import { askNotifyPermission } from '../notifications';
 import { eveningLine, phaseLine, waterLine } from '../dailyTips';
 
 interface HeaderProps {
-  currentCycleDay: number;
+  currentCycleDay?: number;
   currentPhaseName: string;
   menuLabel: string;
   activeTab: TabType;
@@ -35,7 +35,7 @@ export const Header: React.FC<HeaderProps> = ({
       ? { id: 'water', title: 'Bir yudum su', time: 'Bugün', desc: waterLine(waterRemaining, today), type: 'water' }
       : { id: 'water', title: 'Su doldu', time: 'Bugün', desc: waterLine(0, today), type: 'water' };
     return [
-      { id: 'day', title, time: `${currentCycleDay}. gün`, desc: phase, type: 'pms_calm' },
+      ...(currentCycleDay ? [{ id: 'day', title, time: `${currentCycleDay}. gün`, desc: phase, type: 'pms_calm' }] : []),
       water,
       { id: 'evening', title: 'Akşam sana kalsın', time: 'Akşam', desc: eveningLine(today), type: 'pms_calm' },
     ].map((item) => ({ ...item, read: readIds.includes(item.id) }));

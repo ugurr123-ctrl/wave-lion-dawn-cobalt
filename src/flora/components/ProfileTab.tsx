@@ -497,6 +497,11 @@ export const ProfileTab: React.FC<ProfileTabProps> = ({
         </div>
       </div>
 
+      <details className="rounded-2xl border border-pink-100 bg-white p-4 text-sm">
+        <summary className="cursor-pointer font-semibold">Gizlilik ve cihazdaki veriler</summary>
+        <p className="mt-2">Döngü, belirti, profil ve takviye kayıtların bu cihazda saklanır. Profil ayarlarından uygulama kayıtlarını silebilirsin.</p>
+        <p className="mt-2">İndirdiğin raporlar ayrı dosyalardır. Bu dosyaları cihazının dosya yöneticisinden silebilirsin.</p>
+      </details>
       <PremiumGarden showToast={showToast} />
 
       {/* FOOTER ACTIONS */}

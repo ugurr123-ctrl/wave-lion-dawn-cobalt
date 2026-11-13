@@ -1,6 +1,6 @@
 import { Capacitor } from '@capacitor/core';
 import { LocalNotifications } from '@capacitor/local-notifications';
-import { morningLine, supplementLine } from './dailyTips';
+import { morningLine } from './dailyTips';
 import type { SupplementItem } from './types';
 
 export type NotifyState = 'granted' | 'denied' | 'default' | 'unsupported';
@@ -51,48 +51,26 @@ export async function syncReminders(supplements: SupplementItem[]) {
   await ensureChannel();
   const pending = await LocalNotifications.getPending();
   const ours = pending.notifications
-    .filter((item) => (item.id >= 901 && item.id <= 920) || (item.id >= 1200 && item.id < 1800))
+    .filter((item) => (item.id >= 901 && item.id <= 920) || (item.id >= 1200 && item.id < 1800) || item.id >= 2000)
     .map((item) => ({ id: item.id }));
   if (ours.length) await LocalNotifications.cancel({ notifications: ours });
-  const notifications: {
-    id: number;
-    title: string;
-    body: string;
-    channelId: string;
-    schedule: { at: Date; allowWhileIdle: true };
-  }[] = [];
-  for (let offset = 0; offset < 10; offset += 1) {
-    const at = new Date();
-    at.setDate(at.getDate() + offset);
-    at.setHours(9, 0, 0, 0);
-    if (at.getTime() < Date.now() + 30_000) continue;
-    notifications.push({
-      id: 901 + offset,
-      title: 'Floria',
-      body: morningLine(at),
-      channelId: CHANNEL,
-      schedule: { at, allowWhileIdle: true },
-    });
-  }
+  const notifications = [
+    { id: 901, title: 'Floria', body: 'Günlük kaydını güncelleyebilirsin.', channelId: CHANNEL,
+      schedule: { on: { hour: 9, minute: 0, second: 0 }, repeats: true } },
+  ];
   supplements.forEach((item, index) => {
     if (!item.reminderEnabled) return;
     const time = parseTime(item.time);
     if (!time) return;
-    for (let offset = 0; offset < 7; offset += 1) {
-      const at = new Date();
-      at.setDate(at.getDate() + offset);
-      at.setHours(time.hour, time.minute, 0, 0);
-      if (at.getTime() < Date.now() + 30_000) continue;
-      notifications.push({
-        id: 1200 + index * 10 + offset,
-        title: 'Floria',
-        body: supplementLine(item.name, item.dose, at),
-        channelId: CHANNEL,
-        schedule: { at, allowWhileIdle: true },
-      });
-    }
+    notifications.push({
+      id: 2000 + index,
+      title: 'Floria',
+      body: 'Takviye hatırlatıcın var.',
+      channelId: CHANNEL,
+      schedule: { on: { ...time, second: 0 }, repeats: true },
+    });
   });
-  if (notifications.length) await LocalNotifications.schedule({ notifications });
+  await LocalNotifications.schedule({ notifications });
 }
 
 export async function askNotifyPermission(supplements: SupplementItem[] = []): Promise<NotifyState> {

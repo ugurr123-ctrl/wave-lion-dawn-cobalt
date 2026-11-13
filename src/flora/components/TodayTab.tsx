@@ -219,6 +219,7 @@ export const TodayTab: React.FC<TodayTabProps> = ({
           </div>
         </div>
 
+        {lastPeriodDate && (
         <div className="flex items-center gap-2 mt-0.5 flex-wrap">
           <span className="px-3 py-1 rounded-full bg-white text-[#b0004a] text-xs font-bold shadow-xs flex items-center gap-1.5 border border-pink-100">
             <span className="w-2 h-2 rounded-full bg-[#d81b60] animate-ping" />
@@ -229,6 +230,7 @@ export const TodayTab: React.FC<TodayTabProps> = ({
             Tahmini doğurganlık: {conceptionInfo.label}
           </span>
         </div>
+        )}
       </section>
 
       {/* RUH HALİ & ÖFKE ÖNCESİ ŞEFKATLİ RAHATLAMA ALANI */}
@@ -242,15 +244,15 @@ export const TodayTab: React.FC<TodayTabProps> = ({
             </div>
             <div>
               <div className="flex items-center gap-1.5">
-                <h4 className="font-extrabold text-sm text-[#1f1a1c]">{moodAdvice.title}</h4>
+                <h4 className="font-extrabold text-sm text-[#1f1a1c]">{lastPeriodDate ? moodAdvice.title : 'Günlük ruh hali'}</h4>
                 <span className={`text-[9.5px] font-black px-2 py-0.2 rounded-full ${
                   moodAdvice.isHighAlert ? 'bg-rose-100 text-rose-800' : 'bg-pink-100 text-[#b0004a]'
                 }`}>
-                  {moodAdvice.tag}
+                  {lastPeriodDate && moodAdvice.tag}
                 </span>
               </div>
               <p className="text-[11px] text-[#805062] font-medium leading-snug mt-0.5">
-                {moodAdvice.subtitle}
+                {lastPeriodDate && moodAdvice.subtitle}
               </p>
             </div>
           </div>
@@ -431,9 +433,10 @@ export const TodayTab: React.FC<TodayTabProps> = ({
       <section className="relative w-full rounded-3xl bg-white p-6 shadow-[0_16px_36px_rgba(216,27,96,0.1)] border border-pink-100/70 flex flex-col items-center text-center overflow-hidden">
         <div className="inline-flex items-center gap-1 px-3.5 py-1 rounded-full bg-[#ffd9de] text-[#b0004a] text-xs font-bold mb-3 shadow-xs">
           <Sparkles className="w-3.5 h-3.5 text-[#d81b60]" />
-          <span>{phaseName} · {currentDayInfo.cycleDay}. gün</span>
+          <span>{lastPeriodDate ? `${phaseName} · ${currentDayInfo.cycleDay}. gün` : 'Son adet tarihi kaydedilmedi'}</span>
         </div>
 
+        {lastPeriodDate && <>
         {/* Meditative Breathing Cycle Ring with Orbiting Particles */}
         <div
           onClick={onOpenSymptomModal}
@@ -516,8 +519,10 @@ export const TodayTab: React.FC<TodayTabProps> = ({
         </div>
 
         <p className="text-[11px] text-[#805062] mt-3 leading-relaxed text-center px-2">
-          {conceptionInfo.explanation}
+          {conceptionInfo.explanation} Takvim tahminini gebelikten korunmak için kullanmayın.
         </p>
+
+        </>}
 
         {/* Button to Record Symptoms */}
         <button

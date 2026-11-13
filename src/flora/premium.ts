@@ -26,6 +26,8 @@ export function formatUntil(iso: string): string {
   return new Date(year, month - 1, day).toLocaleDateString('tr-TR', { day: 'numeric', month: 'long', year: 'numeric' });
 }
 
+export const DEMO_PURCHASES_ENABLED = import.meta.env.DEV;
+
 const KEY = 'flora-store-receipt';
 
 function todayISO(date = new Date()): string {
@@ -36,7 +38,7 @@ function todayISO(date = new Date()): string {
 }
 
 export function readReceipt(): PremiumReceipt | null {
-  if (typeof window === 'undefined') return null;
+  if (!DEMO_PURCHASES_ENABLED || typeof window === 'undefined') return null;
   try {
     const raw = localStorage.getItem(KEY);
     if (!raw) return null;
@@ -58,6 +60,7 @@ export function planName(id: PremiumPlanId): string {
 }
 
 export function purchasePlan(id: PremiumPlanId): PremiumReceipt {
+  if (!DEMO_PURCHASES_ENABLED) throw new Error('Demo purchases are disabled');
   const plan = PREMIUM_PLANS.find((item) => item.id === id) ?? PREMIUM_PLANS[1];
   const until = new Date();
   until.setDate(until.getDate() + plan.days);
