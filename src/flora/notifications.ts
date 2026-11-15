@@ -38,7 +38,15 @@ async function ensureChannel() {
   });
 }
 
-export async function syncReminders(supplements: SupplementItem[]) {
+let reminderSync = Promise.resolve();
+
+export function syncReminders(supplements: SupplementItem[]) {
+  const next = reminderSync.catch(() => {}).then(() => scheduleReminders(supplements));
+  reminderSync = next;
+  return next;
+}
+
+async function scheduleReminders(supplements: SupplementItem[]) {
   if (!native()) return;
   const status = await LocalNotifications.checkPermissions();
   if (status.display !== 'granted') return;
@@ -51,7 +59,7 @@ export async function syncReminders(supplements: SupplementItem[]) {
   await ensureChannel();
   const pending = await LocalNotifications.getPending();
   const ours = pending.notifications
-    .filter((item) => (item.id >= 901 && item.id <= 920) || (item.id >= 1200 && item.id < 1800) || item.id >= 2000)
+    .filter((item) => (item.id >= 901 && item.id <= 920) || (item.id >= 1200 && item.id < 1800) || (item.id >= 2000 && item.id < 100000))
     .map((item) => ({ id: item.id }));
   if (ours.length) await LocalNotifications.cancel({ notifications: ours });
   const notifications = [
@@ -95,7 +103,7 @@ export function showSystemNotification(title: string, body: string) {
   if (!native()) return;
   void LocalNotifications.schedule({
     notifications: [{
-      id: Math.floor(Date.now() % 100000) + 2000,
+      id: Math.floor(Date.now() % 100000) + 100000,
       title,
       body,
       channelId: CHANNEL,

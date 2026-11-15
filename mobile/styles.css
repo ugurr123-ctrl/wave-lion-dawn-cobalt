@@ -19,3 +19,15 @@ html { background: #fff8f8; }
 #root header.sticky { top: env(safe-area-inset-top, 0px); }
 #root nav.fixed { padding-bottom: env(safe-area-inset-bottom, 0px); }
 #root :is(input, textarea, select) { font-size: max(16px, 1em); }
+
+/* Keep scrolling cards behind an opaque status-bar surface. */
+#root::before {
+  content: '';
+  position: fixed;
+  inset: 0 0 auto;
+  height: env(safe-area-inset-top, 0px);
+  background: #fff8f8;
+  z-index: 41;
+  pointer-events: none;
+}
+#root header.sticky { background: #fff8f8; }
