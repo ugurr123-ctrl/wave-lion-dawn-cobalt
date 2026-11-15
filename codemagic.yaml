@@ -27,3 +27,32 @@ workflows:
         auth: integration
         submit_to_testflight: false
         submit_to_app_store: false
+  floria-ios-beta:
+    name: Floria iOS Internal Test
+    instance_type: mac_mini_m2
+    environment:
+      xcode: latest
+      node: 24
+      ios_signing:
+        distribution_type: app_store
+        bundle_identifier: com.floria.cycle
+    scripts:
+      - name: Prepare Capacitor
+        script: |
+          npm ci
+          VITE_FLORIA_BETA_GUIDE=true npm run build:ios
+      - name: Sign and build IPA
+        script: |
+          sed -i '' 's/CURRENT_PROJECT_VERSION = 3;/CURRENT_PROJECT_VERSION = 4;/g' ios/App/App.xcodeproj/project.pbxproj
+          xcode-project use-profiles --project ios/App/App.xcodeproj --custom-export-options='{"testFlightInternalTestingOnly": true}'
+          xcode-project build-ipa --project ios/App/App.xcodeproj --scheme App
+    artifacts:
+      - build/ios/ipa/*.ipa
+      - /tmp/xcodebuild_logs/*.log
+    integrations:
+      app_store_connect: party-box
+    publishing:
+      app_store_connect:
+        auth: integration
+        submit_to_testflight: false
+        submit_to_app_store: false

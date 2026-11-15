@@ -344,7 +344,7 @@ export function RehberTab({
   useEffect(() => {
     onTitle?.(guideId ? SCREEN_TITLE[guideId] : 'Rehber');
   }, [guideId, onTitle]);
-  if (!open && !isPremiumActive()) {
+  if (import.meta.env.VITE_FLORIA_BETA_GUIDE !== 'true' && !open && !isPremiumActive()) {
     return (
       <div className="pb-40 pt-2">
         <PremiumGarden onChange={() => setOpen(isPremiumActive())} />
