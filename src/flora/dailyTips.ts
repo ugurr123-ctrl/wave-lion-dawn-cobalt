@@ -465,12 +465,26 @@ export type DailySuggestion = {
   seasonB: string;
 };
 
+const NOVEMBER_EXTRAS = [
+  { lead: 'Gün ışığından küçük bir pay al.', a: 'Öğle arasında on dakika dışarı çık.', b: 'Yağmur varsa pencere yanında kısa bir mola ver.' },
+  { lead: 'Soğuk günler için sıcak bir öğün.', a: 'Mercimek çorbasının yanına limon ve yeşillik ekle.', b: 'Bir porsiyonu ertesi gün için ayır.' },
+  { lead: 'Akşamı biraz yavaşlat.', a: 'Yatmadan önce ışığı kıs ve ertesi günün kıyafetini hazırla.', b: 'Telefonu yatağın uzağında şarja bırak.' },
+  { lead: 'Yağmurlu günlerde de hareket edebilirsin.', a: 'Sevdiğin bir şarkı boyunca evde yürü.', b: 'Omuzlarını rahatça çevir ve kısa bir mola ver.' },
+  { lead: 'Mevsim meyvelerinden birini dene.', a: 'Mandalina veya elmayı ara öğününde değerlendir.', b: 'İstersen yanında sade yoğurt ye.' },
+  { lead: 'Su içmeyi görünür kıl.', a: 'Çalıştığın yere bir bardak su koy.', b: 'Yemek molasında bardağını yeniden doldur.' },
+  { lead: 'Kasım pazarına uğra.', a: 'Pırasa veya karnabaharla kolay bir fırın yemeği planla.', b: 'Evdeki sebzeleri önce kullan.' },
+  { lead: 'Kısa bir haftalık değerlendirme yap.', a: 'Uyku ve enerji kayıtlarına göz at.', b: 'Önümüzdeki hafta için tek küçük alışkanlık seç.' },
+  { lead: 'Ekran başında ara ver.', a: 'Bir dakika uzağa bakıp omuzlarını gevşet.', b: 'Sonraki molanı pencere kenarında geçir.' },
+  { lead: 'Kat kat giyinip kısa bir yürüyüş planla.', a: 'Hava kararmadan bildiğin bir rotaya çık.', b: 'Yağış varsa yürüyüşü kapalı alanda yap.' },
+];
+
 export function dailySuggestion(date = new Date()): DailySuggestion {
   const month = date.getMonth();
   const day = date.getDate();
   const pick = (list: string[], salt: number) => list[(day + month * salt) % list.length];
   const seasonPack = SEASONS[month];
-  const season = seasonPack[day % seasonPack.length];
+  const pool = month === 10 ? [...seasonPack, ...NOVEMBER_EXTRAS] : seasonPack;
+  const season = pool[(day - 1) % pool.length];
   return {
     month: MONTHS[month],
     day,

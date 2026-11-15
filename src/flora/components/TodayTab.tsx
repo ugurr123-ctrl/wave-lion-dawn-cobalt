@@ -81,7 +81,25 @@ export const TodayTab: React.FC<TodayTabProps> = ({
   const pressIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
   // Dynamic Date calculation
-  const now = new Date();
+  const [now, setNow] = useState(() => new Date());
+
+  useEffect(() => {
+    let timer: ReturnType<typeof setTimeout>;
+    const refresh = () => {
+      clearTimeout(timer);
+      const current = new Date();
+      setNow(current);
+      const midnight = new Date(current);
+      midnight.setHours(24, 0, 0, 0);
+      timer = setTimeout(refresh, midnight.getTime() - current.getTime() + 100);
+    };
+    refresh();
+    document.addEventListener('visibilitychange', refresh);
+    return () => {
+      clearTimeout(timer);
+      document.removeEventListener('visibilitychange', refresh);
+    };
+  }, []);
   const todayFormatted = now.toLocaleDateString('tr-TR', {
     day: 'numeric',
     month: 'long',
