@@ -496,12 +496,23 @@ const SCREEN_LOOK: Record<string, { name: string; sub: string; icon: string; chi
   'Cilt ve epilasyon': { name: 'Cilt', sub: 'Bakım takvimi', icon: '✨', chip: 'Sanctuary' },
 };
 
+const SCREEN_DESCRIPTION: Record<string, string> = {
+  "Tarif ve menü": "Tariflere göz at ve günün öğünlerini planla.",
+  "Market listesi": "Öğün planındaki malzemeleri alışveriş listende işaretle.",
+  "Denge": "Tohum ve kafein önerilerini incele.",
+  "Antrenman": "Egzersiz seçeneklerini ve hareketlerin uygulamasını incele.",
+  "Enerji ve eklem": "Enerji ve eklem konforuna göre hareket seçeneklerini keşfet.",
+  "Esneme": "Esneme pozlarını ve bekleme sürelerini adım adım takip et.",
+  "Ses banyosu": "Bir ses seç ve 20 saniyelik dinleme molası ver.",
+  "Nefes ve uyku": "Bir ritim seç, nefes adımlarını ve uyku için üç turu ekrandan takip et."
+};
+
 function Shell({ title, phase, onBack, children }: { title: string; phase: CyclePhase; onBack: () => void; children: React.ReactNode }) {
   const look = SCREEN_LOOK[title] ?? { name: title, sub: PHASE_LABEL[phase], icon: '🌸', chip: 'Rehber' };
   return (
     <div className="space-y-3 pb-40 pt-1 text-[#1f1a1c]">
       <GuideTop chip={look.chip} onBack={onBack} />
-      <GuideIntro icon={look.icon} name={look.name} sub={look.sub} phase={phase} />
+      <GuideIntro icon={look.icon} name={look.name} sub={look.sub} description={SCREEN_DESCRIPTION[title] ?? look.sub} />
       {children}
     </div>
   );
@@ -525,7 +536,7 @@ function GuideTop({ chip, onBack }: { chip: string; onBack: () => void }) {
   );
 }
 
-function GuideIntro({ icon, name, sub, phase }: { icon: string; name: string; sub: string; phase: CyclePhase }) {
+function GuideIntro({ icon, name, sub, description }: { icon: string; name: string; sub: string; description: string }) {
   return (
     <div className="rounded-[28px] bg-white border border-[#f6e4ea] p-4 shadow-[0_10px_30px_rgba(22,19,20,0.04)]">
       <div className="flex items-start gap-3">
@@ -536,7 +547,7 @@ function GuideIntro({ icon, name, sub, phase }: { icon: string; name: string; su
           <p className="text-sm font-bold text-[#e23b78] mt-1">{sub}</p>
         </div>
       </div>
-      <p className="text-[14px] leading-relaxed text-[#6d5a60] mt-3">{guideNote(phase)}</p>
+      <p className="text-[14px] leading-relaxed text-[#6d5a60] mt-3">{description}</p>
     </div>
   );
 }
@@ -1019,68 +1030,43 @@ function Stretch({ phase, onBack }: { phase: CyclePhase; onBack: () => void }) {
 }
 
 function SoundBath({ phase, onBack }: { phase: CyclePhase; onBack: () => void }) {
-  const ctxRef = useRef<AudioContext | null>(null);
-  const stopRef = useRef<(() => void) | null>(null);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
   const [playing, setPlaying] = useState<string | null>(null);
   const [left, setLeft] = useState(20);
+  const [error, setError] = useState(false);
 
   const stop = () => {
-    stopRef.current?.();
-    stopRef.current = null;
+    audioRef.current?.pause();
+    audioRef.current = null;
     setPlaying(null);
   };
 
-  useEffect(() => {
-    return () => {
-      stopRef.current?.();
-    };
+  useEffect(() => () => {
+    audioRef.current?.pause();
+    audioRef.current = null;
   }, []);
-
-  useEffect(() => {
-    if (!playing) return;
-    setLeft(20);
-    const timer = window.setInterval(() => {
-      setLeft((value) => (value > 0 ? value - 1 : 0));
-    }, 1000);
-    return () => window.clearInterval(timer);
-  }, [playing]);
 
   const play = async (sound: (typeof SOUNDS)[number]) => {
     stop();
-    const Ctx = window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
-    const ctx = ctxRef.current ?? new Ctx();
-    ctxRef.current = ctx;
-    if (ctx.state === 'suspended') await ctx.resume();
-    const left = ctx.createOscillator();
-    const right = ctx.createOscillator();
-    const gain = ctx.createGain();
-    const merger = ctx.createChannelMerger(2);
-    left.frequency.value = sound.left;
-    right.frequency.value = sound.right;
-    left.type = 'sine';
-    right.type = 'sine';
-    gain.gain.value = 0.03;
-    left.connect(merger, 0, 0);
-    right.connect(merger, 0, 1);
-    merger.connect(gain);
-    gain.connect(ctx.destination);
-    left.start();
-    right.start();
-    setPlaying(sound.id);
-    const timer = window.setTimeout(() => {
-      left.stop();
-      right.stop();
-      setPlaying(null);
-    }, 20000);
-    stopRef.current = () => {
-      window.clearTimeout(timer);
-      try {
-        left.stop();
-        right.stop();
-      } catch {
-        /* already stopped */
-      }
+    setError(false);
+    setLeft(20);
+    const audio = new Audio(`/sounds/${sound.id}.wav`);
+    audioRef.current = audio;
+    audio.ontimeupdate = () => setLeft(Math.max(0, Math.ceil(20 - audio.currentTime)));
+    audio.onended = () => { if (audioRef.current === audio) stop(); };
+    audio.onerror = () => {
+      if (audioRef.current !== audio) return;
+      stop();
+      setError(true);
     };
+    try {
+      await audio.play();
+      if (audioRef.current === audio) setPlaying(sound.id);
+    } catch {
+      if (audioRef.current !== audio) return;
+      stop();
+      setError(true);
+    }
   };
 
   const current = SOUNDS.find((sound) => sound.id === playing);
@@ -1123,6 +1109,7 @@ function SoundBath({ phase, onBack }: { phase: CyclePhase; onBack: () => void })
         </div>
       </div>
       <p className="text-[11px] text-[#9a8088] px-1">Kulaklıkla dinle. Ses kısık başlar. Tedavi değildir.</p>
+      {error && <p role="alert" className="px-1 text-sm text-rose-800">Ses başlatılamadı. Medya sesini kontrol edip tekrar dene.</p>}
       {SOUNDS.map((sound) => (
         <Card key={sound.id}>
           <div className="flex items-center justify-between gap-3">
@@ -1203,6 +1190,8 @@ function BreathSleep({ phase, onBack }: { phase: CyclePhase; onBack: () => void 
   const [left, setLeft] = useState<number>(tech.steps[0].n);
   const [on, setOn] = useState(false);
   const stepRef = useRef(0);
+  const [sleep, setSleep] = useState(false);
+  const [rounds, setRounds] = useState(0);
   const current = tech.steps[Math.min(step, tech.steps.length - 1)];
 
   useEffect(() => {
@@ -1216,10 +1205,14 @@ function BreathSleep({ phase, onBack }: { phase: CyclePhase; onBack: () => void 
   useEffect(() => {
     if (!on || left !== 0) return;
     const next = (stepRef.current + 1) % tech.steps.length;
+    if (sleep && next === 0) {
+      setRounds(rounds + 1);
+      if (rounds === 2) setOn(false);
+    }
     stepRef.current = next;
     setStep(next);
     setLeft(tech.steps[next].n);
-  }, [on, left, step, tech]);
+  }, [on, left, step, tech, rounds, sleep]);
 
   const open = current.label === 'Al' || current.label === 'Ek' || current.label === 'Tut';
   const breathScale = !on ? 1.04 : current.label === 'Ek' ? 1.16 : open ? 1.12 : 1;
@@ -1235,6 +1228,8 @@ function BreathSleep({ phase, onBack }: { phase: CyclePhase; onBack: () => void 
             onClick={() => {
               soundEngine.playDropletSound();
               setOn(false);
+              setSleep(false);
+              setRounds(0);
               setTechId(item.id);
               setStep(0);
               stepRef.current = 0;
@@ -1284,6 +1279,17 @@ function BreathSleep({ phase, onBack }: { phase: CyclePhase; onBack: () => void 
       </Card>
       <Card>
         <p className="text-xs font-black">Uykuya geçiş</p>
+        <progress className="block h-2 w-full accent-[#b0004a]" max={3} value={rounds} aria-label="Tamamlanan uyku turları" />
+        <p className="text-xs text-[#5a4044]">{rounds} / 3 tur</p>
+        <button type="button" className="rounded-full bg-[#4a1230] px-4 py-2 text-sm text-white" onClick={() => {
+          setTechId('478');
+          stepRef.current = 0;
+          setStep(0);
+          setLeft(BREATHS[0].steps[0].n);
+          setRounds(0);
+          setSleep(true);
+          setOn(true);
+        }}>3 turluk uyku ritmini başlat</button>
         <p className="text-xs leading-relaxed text-[#5a4044]">
           Işığı kıs. Ayaklar sıcak, oda serin. 4-7-8 ile üç tur yap, sonra 5-5 ritmine geç. Cümleler seyrekleşince saymayı bırak.
         </p>
@@ -1391,7 +1397,7 @@ function SkinCare({
           <p className="text-[15px] font-bold mt-1">Bakım takvimi</p>
         </div>
       </div>
-      <p className="text-[15px] leading-relaxed text-[#6d5a60]">{guideNote(phase)}</p>
+      <p className="text-[15px] leading-relaxed text-[#6d5a60]">Bakım önerilerini incele ve epilasyon için takvimdeki günlere göz at.</p>
 
       <div className={`rounded-[28px] bg-gradient-to-br ${phase === 'folikuler' ? 'from-emerald-100 via-white to-teal-50' : phase === 'ovulasyon' ? 'from-amber-100 via-white to-orange-50' : phase === 'luteal' ? 'from-violet-100 via-white to-fuchsia-50' : phase === 'pms' ? 'from-fuchsia-100 via-white to-rose-50' : 'from-rose-100 via-white to-pink-50'} border border-white p-4 shadow-sm`}>
         <div className="flex items-center justify-between gap-2">

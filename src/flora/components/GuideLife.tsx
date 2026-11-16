@@ -11,6 +11,18 @@ export function isLifeId(id: string): id is LifeId {
   return ['mind', 'meeting', 'fog', 'trip', 'delay', 'travel', 'libido', 'social', 'talk'].includes(id);
 }
 
+const SCREEN_DESCRIPTION: Record<string, string> = {
+  "Zihin takvimi": "Döngü takvimindeki günlere bakarak işlerini planla.",
+  "Toplantı danışmanı": "Toplantı için düşündüğün günü takvim üzerinde incele.",
+  "Beyin sisi": "Dikkatini toparlamak için işleri küçük adımlara böl.",
+  "Tatil çakışması": "Seyahat tarihlerini tahmini adet aralığıyla karşılaştır.",
+  "Tarih kaydırma": "Planın için alternatif tarihleri incele.",
+  "Uçuş ve özel gece": "Uçuş ve akşam planı için hazırlık önerilerine göz at.",
+  "Libido penceresi": "Libido takibini ve döngü tahminini birlikte incele.",
+  "Sosyal pil": "Sosyal planlarını kendi enerji düzeyine göre gözden geçir.",
+  "İletişim": "İhtiyaçlarını anlatmak için örnek cümlelerden yararlan."
+};
+
 function Shell({ title, phase, onBack, children }: { title: string; phase: CyclePhase; onBack: () => void; children: React.ReactNode }) {
   const labels: Record<CyclePhase, string> = {
     regl: 'Kanama günleri',
@@ -55,7 +67,7 @@ function Shell({ title, phase, onBack, children }: { title: string; phase: Cycle
             <p className="text-sm font-bold text-[#e23b78] mt-1">{tone.sub}</p>
           </div>
         </div>
-        <p className="text-[14px] leading-relaxed text-[#6d5a60] mt-3">{guideNote(phase)}</p>
+        <p className="text-[14px] leading-relaxed text-[#6d5a60] mt-3">{SCREEN_DESCRIPTION[title] ?? tone.sub}</p>
       </div>
       {children}
     </div>
