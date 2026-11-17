@@ -68,6 +68,7 @@ export const ProfileTab: React.FC<ProfileTabProps> = ({
   const [newSuppDose, setNewSuppDose] = useState('1 Tablet');
   const [newSuppTime, setNewSuppTime] = useState('09:00');
   const [newSuppReminder, setNewSuppReminder] = useState(true);
+  const [notifyFailed, setNotifyFailed] = useState(false);
   const [notify, setNotify] = useState<NotifyState>('default');
   React.useEffect(() => {
     void readNotifyState().then(setNotify);
@@ -385,7 +386,7 @@ export const ProfileTab: React.FC<ProfileTabProps> = ({
 
               <div className="flex items-center gap-2">
                 <span className="text-[10px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200">
-                  {item.reminderEnabled ? 'Açıkken hatırlatır' : 'Hatırlatma yok'}
+                  {item.reminderEnabled ? 'Hatırlatma açık' : 'Hatırlatma yok'}
                 </span>
                 {supplements.length > 1 && (
                   <button
@@ -480,18 +481,20 @@ export const ProfileTab: React.FC<ProfileTabProps> = ({
           <div>
             <p className="text-xs font-bold text-[#1f1a1c]">Bildirim izni</p>
             <p className="text-[11px] text-[#805062]">
-              {notify === 'granted' ? 'Açık. Sabah 9 ve takviye saatinde, uygulama kapalıyken de gelir.' : notify === 'denied' ? 'Kapalı. Telefon ayarından açabilirsin.' : notify === 'unsupported' ? 'Kurulu Floria uygulamasında sorulur. Tarayıcıda gelmez.' : 'Henüz sorulmadı.'}
+              {notify === 'granted' ? 'İzin açık. Sabah 9 ve seçtiğin takviye saatleri için hatırlatma ayarlayabilirsin.' : notify === 'denied' ? 'Kapalı. Telefon ayarından açabilirsin.' : notify === 'unsupported' ? 'Kurulu Floria uygulamasında sorulur. Tarayıcıda gelmez.' : 'Henüz sorulmadı.'}
             </p>
           </div>
-          {notify !== 'granted' && notify !== 'unsupported' && (
+          {notifyFailed && <p role="alert" className="text-xs text-rose-800">Hatırlatıcı kurulamadı. Tekrar dene.</p>}
+          {notify !== 'unsupported' && (
             <button
               type="button"
               onClick={() => {
-                void askNotifyPermission(supplements).then(setNotify);
+                setNotifyFailed(false);
+                void askNotifyPermission(supplements).then(setNotify).catch(() => setNotifyFailed(true));
               }}
               className="shrink-0 px-3 py-1.5 rounded-full bg-[#1f1a1c] text-white text-xs font-bold cursor-pointer"
             >
-              İzin ver
+              {notify === 'granted' ? 'Hatırlatıcıları kur' : 'İzin ver'}
             </button>
           )}
         </div>

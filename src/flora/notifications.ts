@@ -1,6 +1,5 @@
 import { Capacitor } from '@capacitor/core';
 import { LocalNotifications } from '@capacitor/local-notifications';
-import { morningLine } from './dailyTips';
 import type { SupplementItem } from './types';
 
 export type NotifyState = 'granted' | 'denied' | 'default' | 'unsupported';
@@ -50,18 +49,11 @@ async function scheduleReminders(supplements: SupplementItem[]) {
   if (!native()) return;
   const status = await LocalNotifications.checkPermissions();
   if (status.display !== 'granted') return;
-  try {
-    const exact = await LocalNotifications.checkExactNotificationSetting();
-    if (exact.exact_alarm !== 'granted') await LocalNotifications.changeExactNotificationSetting();
-  } catch {
-    /* older android builds still schedule */
-  }
-  await ensureChannel();
+  if (Capacitor.getPlatform() === 'android') await ensureChannel();
   const pending = await LocalNotifications.getPending();
   const ours = pending.notifications
     .filter((item) => (item.id >= 901 && item.id <= 920) || (item.id >= 1200 && item.id < 1800) || (item.id >= 2000 && item.id < 100000))
     .map((item) => ({ id: item.id }));
-  if (ours.length) await LocalNotifications.cancel({ notifications: ours });
   const notifications = [
     { id: 901, title: 'Floria', body: 'Günlük kaydını güncelleyebilirsin.', channelId: CHANNEL,
       schedule: { on: { hour: 9, minute: 0, second: 0 }, repeats: true } },
@@ -79,6 +71,14 @@ async function scheduleReminders(supplements: SupplementItem[]) {
     });
   });
   await LocalNotifications.schedule({ notifications });
+  const expected = new Set(notifications.map(({ id }) => id));
+  const stale = ours.filter(({ id }) => !expected.has(id) && id !== 902);
+  if (stale.length) await LocalNotifications.cancel({ notifications: stale });
+  const scheduled = await LocalNotifications.getPending();
+  const pendingIds = new Set(scheduled.notifications.map(({ id }) => id));
+  if (notifications.some(({ id }) => !pendingIds.has(id))) {
+    throw new Error('Floria reminders were not registered by the operating system');
+  }
 }
 
 export async function askNotifyPermission(supplements: SupplementItem[] = []): Promise<NotifyState> {
@@ -86,7 +86,6 @@ export async function askNotifyPermission(supplements: SupplementItem[] = []): P
   const perm = await LocalNotifications.requestPermissions();
   if (perm.display !== 'granted') return perm.display === 'denied' ? 'denied' : 'default';
   await syncReminders(supplements);
-  window.dispatchEvent(new Event('floria-notify'));
   await LocalNotifications.schedule({
     notifications: [{
       id: 902,

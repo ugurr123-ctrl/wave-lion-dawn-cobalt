@@ -215,8 +215,9 @@ export default function App() {
     if (!ready) return;
     const run = () => { void syncReminders(supplements).catch((error) => console.warn("Floria reminders:", error)); };
     run();
-    window.addEventListener('floria-notify', run);
-    return () => window.removeEventListener('floria-notify', run);
+    const refresh = () => { if (!document.hidden) run(); };
+    document.addEventListener('visibilitychange', refresh);
+    return () => document.removeEventListener('visibilitychange', refresh);
   }, [ready, supplements]);
 
   useEffect(() => {
