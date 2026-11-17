@@ -26,7 +26,6 @@ import { UserProfile, SupplementItem, defaultPartnerShare, PartnerShareKey, PART
 import { FloraLogo } from './FloraLogo';
 import { soundEngine } from '../utils/audio';
 import { triggerRosePollenBurst } from '../utils/confetti';
-import { PremiumGarden } from './PremiumGarden';
 import { askNotifyPermission, readNotifyState, type NotifyState } from '../notifications';
 
 interface ProfileTabProps {
@@ -37,6 +36,8 @@ interface ProfileTabProps {
   onAddSupplement: (item: SupplementItem) => void;
   onDeleteSupplement: (id: string) => void;
   onResetData: () => void;
+  reminderError: boolean;
+  onReminderError: (failed: boolean) => void;
 }
 
 export const ProfileTab: React.FC<ProfileTabProps> = ({
@@ -47,6 +48,8 @@ export const ProfileTab: React.FC<ProfileTabProps> = ({
   onAddSupplement,
   onDeleteSupplement,
   onResetData,
+  reminderError,
+  onReminderError,
 }) => {
   // Goal state
   const [selectedGoal, setSelectedGoal] = useState<'regl' | 'hamilelik' | 'gebelik'>('hamilelik');
@@ -68,11 +71,10 @@ export const ProfileTab: React.FC<ProfileTabProps> = ({
   const [newSuppDose, setNewSuppDose] = useState('1 Tablet');
   const [newSuppTime, setNewSuppTime] = useState('09:00');
   const [newSuppReminder, setNewSuppReminder] = useState(true);
-  const [notifyFailed, setNotifyFailed] = useState(false);
   const [notify, setNotify] = useState<NotifyState>('default');
   React.useEffect(() => {
-    void readNotifyState().then(setNotify);
-  }, []);
+    void readNotifyState().then(setNotify).catch(() => onReminderError(true));
+  }, [onReminderError]);
 
   // Form states for sleep and cycle
   const [bedtime, setBedtime] = useState<string>(profile.quietHoursStart || '23:00');
@@ -484,13 +486,13 @@ export const ProfileTab: React.FC<ProfileTabProps> = ({
               {notify === 'granted' ? 'İzin açık. Sabah 9 ve seçtiğin takviye saatleri için hatırlatma ayarlayabilirsin.' : notify === 'denied' ? 'Kapalı. Telefon ayarından açabilirsin.' : notify === 'unsupported' ? 'Kurulu Floria uygulamasında sorulur. Tarayıcıda gelmez.' : 'Henüz sorulmadı.'}
             </p>
           </div>
-          {notifyFailed && <p role="alert" className="text-xs text-rose-800">Hatırlatıcı kurulamadı. Tekrar dene.</p>}
+          {reminderError && <p role="alert" className="text-xs text-rose-800">Hatırlatıcı kurulamadı. Tekrar dene.</p>}
           {notify !== 'unsupported' && (
             <button
               type="button"
               onClick={() => {
-                setNotifyFailed(false);
-                void askNotifyPermission(supplements).then(setNotify).catch(() => setNotifyFailed(true));
+                onReminderError(false);
+                void askNotifyPermission(supplements).then(setNotify).catch(() => onReminderError(true));
               }}
               className="shrink-0 px-3 py-1.5 rounded-full bg-[#1f1a1c] text-white text-xs font-bold cursor-pointer"
             >
@@ -505,7 +507,6 @@ export const ProfileTab: React.FC<ProfileTabProps> = ({
         <p className="mt-2">Döngü, belirti, profil ve takviye kayıtların bu cihazda saklanır. Profil ayarlarından uygulama kayıtlarını silebilirsin.</p>
         <p className="mt-2">İndirdiğin raporlar ayrı dosyalardır. Bu dosyaları cihazının dosya yöneticisinden silebilirsin.</p>
       </details>
-      <PremiumGarden showToast={showToast} />
 
       {/* FOOTER ACTIONS */}
       <div className="space-y-2 pt-2">

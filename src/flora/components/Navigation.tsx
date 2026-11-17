@@ -89,14 +89,14 @@ export const Navigation: React.FC<NavigationProps> = ({ activeTab, setActiveTab,
                       </div>
                     </div>
                     <span className="text-[9px] font-extrabold text-[#b0004a] mt-1">
-                      {tab.id === 'rehber' && !premium ? 'Rehber 👑' : tab.label}
+                      {tab.label}
                     </span>
                   </div>
                 ) : (
                   <div className="flex flex-col items-center py-1 px-1">
                     <Icon className="w-4 h-4 text-[#805062]" />
                     <span className="text-[9px] font-semibold text-[#805062] mt-1">
-                      {tab.id === 'rehber' && !premium ? 'Rehber 👑' : tab.label}
+                      {tab.label}
                     </span>
                   </div>
                 )}

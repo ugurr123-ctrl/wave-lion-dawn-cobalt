@@ -5,9 +5,7 @@ import { phaseForCycleDay, toLocalISO } from '../utils/cycleIntelligence';
 import { soundEngine } from '../utils/audio';
 import { isLifeId, LifeScreen, RehberAlerts } from './GuideLife';
 import { marketLines, menuFor, readJson, writeJson } from '../guideKitchen';
-import { PremiumGarden } from './PremiumGarden';
 import { guideNote } from '../dailyTips';
-import { isPremiumActive } from '../premium';
 
 export type GuideSignals = {
   waterCurrentMl: number;
@@ -328,7 +326,6 @@ export function RehberTab({
   lastPeriodDate,
   onTitle,
   signals,
-  premium,
 }: {
   phase: CyclePhase;
   cycleDay: number;
@@ -337,20 +334,11 @@ export function RehberTab({
   lastPeriodDate: string;
   onTitle?: (title: string) => void;
   signals: GuideSignals;
-  premium: boolean;
 }) {
   const [guideId, setGuideId] = useState<GuideId | null>(null);
-  const [open, setOpen] = useState(premium);
   useEffect(() => {
     onTitle?.(guideId ? SCREEN_TITLE[guideId] : 'Rehber');
   }, [guideId, onTitle]);
-  if (import.meta.env.VITE_FLORIA_BETA_GUIDE !== 'true' && !open && !isPremiumActive()) {
-    return (
-      <div className="pb-40 pt-2">
-        <PremiumGarden onChange={() => setOpen(isPremiumActive())} />
-      </div>
-    );
-  }
   return (
     <div className="pt-2">
       {guideId === null && (

@@ -11,8 +11,6 @@ import { soundEngine } from '../utils/audio';
 import { triggerRosePollenBurst } from '../utils/confetti';
 import { DayInfo, CycleRecord } from '../types';
 import { cycleDayFromLastPeriod, formatTrDate, parseLocalISO } from '../utils/cycleIntelligence';
-import { PremiumGarden } from './PremiumGarden';
-import { isPremiumActive } from '../premium';
 
 interface ReportsTabProps {
   onOpenDoctorReport: () => void;
@@ -22,7 +20,6 @@ interface ReportsTabProps {
   goal: string;
   loggedDays: DayInfo[];
   cycles: CycleRecord[];
-  premium: boolean;
 }
 
 export const ReportsTab: React.FC<ReportsTabProps> = ({
@@ -33,10 +30,7 @@ export const ReportsTab: React.FC<ReportsTabProps> = ({
   goal,
   loggedDays,
   cycles,
-  premium,
 }) => {
-  const [paywall, setPaywall] = useState(false);
-  const [allowed, setAllowed] = useState(premium);
   const [activeFilter, setActiveFilter] = useState<'3cycles' | '6months' | 'year'>('6months');
   const hasCycle = Boolean(lastPeriodDate);
   const cycleDay = hasCycle ? cycleDayFromLastPeriod(lastPeriodDate, cycleLength) : 0;
@@ -121,10 +115,6 @@ export const ReportsTab: React.FC<ReportsTabProps> = ({
   };
 
   const handlePdfClick = (e: React.MouseEvent) => {
-    if (!allowed && !isPremiumActive()) {
-      setPaywall(true);
-      return;
-    }
     soundEngine.playCrystalChime();
     triggerRosePollenBurst(e.clientX, e.clientY);
     onOpenDoctorReport();
@@ -430,12 +420,9 @@ export const ReportsTab: React.FC<ReportsTabProps> = ({
           className="w-full py-3.5 rounded-2xl bg-white text-[#b0004a] text-xs font-black shadow-lg hover:bg-pink-50 active:scale-98 transition-all flex items-center justify-center gap-2 cursor-pointer"
         >
           <Download className="w-4 h-4 text-[#d81b60]" />
-          <span>{allowed || isPremiumActive() ? 'Özeti görüntüle ve PDF indir' : 'PDF Premium’da'}</span>
+          <span>Özeti görüntüle ve PDF indir</span>
           <ChevronRight className="w-4 h-4" />
         </button>
-        {paywall && !isPremiumActive() && (
-          <PremiumGarden onChange={() => setAllowed(isPremiumActive())} />
-        )}
       </div>
     </div>
   );

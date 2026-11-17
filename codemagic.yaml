@@ -40,10 +40,10 @@ workflows:
       - name: Prepare Capacitor
         script: |
           npm ci
-          VITE_FLORIA_BETA_GUIDE=true npm run build:ios
+          npm run build:ios
       - name: Sign and build IPA
         script: |
-          sed -i '' 's/CURRENT_PROJECT_VERSION = 3;/CURRENT_PROJECT_VERSION = 7;/g' ios/App/App.xcodeproj/project.pbxproj
+          sed -i '' 's/CURRENT_PROJECT_VERSION = 3;/CURRENT_PROJECT_VERSION = 8;/g' ios/App/App.xcodeproj/project.pbxproj
           xcode-project use-profiles --project ios/App/App.xcodeproj --custom-export-options='{"testFlightInternalTestingOnly": true}'
           xcode-project build-ipa --project ios/App/App.xcodeproj --scheme App
     artifacts:

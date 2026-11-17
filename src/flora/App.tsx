@@ -149,6 +149,7 @@ export default function App() {
 
   // Day Data Map
   const [dayDataMap, setDayDataMap] = useState<Record<string, DayInfo>>({});
+  const [reminderError, setReminderError] = useState(false);
   const [storageError, setStorageError] = useState(false);
   const [cycles, setCycles] = useState<CycleRecord[]>([]);
 
@@ -213,11 +214,20 @@ export default function App() {
 
   useEffect(() => {
     if (!ready) return;
-    const run = () => { void syncReminders(supplements).catch((error) => console.warn("Floria reminders:", error)); };
+    let current = true;
+    const run = () => {
+      void syncReminders(supplements).then(
+        () => { if (current) setReminderError(false); },
+        () => { if (current) setReminderError(true); },
+      );
+    };
     run();
     const refresh = () => { if (!document.hidden) run(); };
     document.addEventListener('visibilitychange', refresh);
-    return () => document.removeEventListener('visibilitychange', refresh);
+    return () => {
+      current = false;
+      document.removeEventListener('visibilitychange', refresh);
+    };
   }, [ready, supplements]);
 
   useEffect(() => {
@@ -489,7 +499,6 @@ export default function App() {
                 supplementsTaken: supplements.filter((item) => item.taken).length,
                 supplementsTotal: supplements.length,
               }}
-              premium={isPremiumActive()}
             />
           )}
 
@@ -502,7 +511,6 @@ export default function App() {
               goal={profile.goal}
               loggedDays={Object.values(dayDataMap)}
               cycles={cycles}
-              premium={isPremiumActive()}
             />
           )}
 
@@ -529,6 +537,8 @@ export default function App() {
               onAddSupplement={handleAddSupplement}
               onDeleteSupplement={handleDeleteSupplement}
               onResetData={handleResetData}
+              reminderError={reminderError}
+              onReminderError={setReminderError}
             />
           )}
         </main>
