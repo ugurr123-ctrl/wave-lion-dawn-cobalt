@@ -60,8 +60,8 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({
     },
     {
       id: 'Hormonal Denge & PCOS Takibi',
-      title: 'Hormonal Denge & PCOS Takibi',
-      desc: 'Düzensiz ritim desteği, enerji haritası ve beden farkındalığı.',
+      title: 'Döngü düzensizliklerini kaydet',
+      desc: 'Adet tarihlerini ve günlük belirtilerini kaydet, geçmiş kayıtlarını incele.',
       icon: '🌿',
       iconBg: 'bg-emerald-50 text-emerald-600',
     },
