@@ -15,6 +15,7 @@ workflows:
           npm run build:ios
       - name: Sign and build IPA
         script: |
+          sed -i '' 's/CURRENT_PROJECT_VERSION = 3;/CURRENT_PROJECT_VERSION = 9;/g' ios/App/App.xcodeproj/project.pbxproj
           xcode-project use-profiles --project ios/App/App.xcodeproj
           xcode-project build-ipa --project ios/App/App.xcodeproj --scheme App
     artifacts:
