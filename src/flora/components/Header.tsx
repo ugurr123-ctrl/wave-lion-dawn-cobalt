@@ -1,9 +1,9 @@
-import React, { useMemo, useState } from 'react';
-import { Bell, X, Check, Settings, Volume2, Shield } from 'lucide-react';
+import React, { useEffect, useMemo, useState } from 'react';
+import { Bell, X } from 'lucide-react';
 import { FloraLogo } from './FloraLogo';
 import { TabType } from '../types';
 import { soundEngine } from '../utils/audio';
-import { askNotifyPermission } from '../notifications';
+import { toLocalISO } from '../utils/cycleIntelligence';
 import { eveningLine, phaseLine, waterLine } from '../dailyTips';
 
 interface HeaderProps {
@@ -20,12 +20,29 @@ export const Header: React.FC<HeaderProps> = ({
   currentCycleDay,
   currentPhaseName,
   menuLabel,
-  setActiveTab,
   waterRemaining,
   premium,
 }) => {
   const [showNotifications, setShowNotifications] = useState(false);
-  const [readIds, setReadIds] = useState<string[]>([]);
+  const [todayKey, setTodayKey] = useState(() => toLocalISO(new Date()));
+  const [readIds, setReadIds] = useState<string[]>(() => {
+    try {
+      const saved = JSON.parse(localStorage.getItem('flora-notes-read') || '{}');
+      return saved.date === toLocalISO(new Date()) && Array.isArray(saved.ids) ? saved.ids : [];
+    } catch { return []; }
+  });
+  useEffect(() => {
+    const refresh = () => {
+      const date = toLocalISO(new Date());
+      if (date !== todayKey) {
+        setReadIds([]);
+        setTodayKey(date);
+      }
+    };
+    const timer = window.setInterval(refresh, 30000);
+    document.addEventListener('visibilitychange', refresh);
+    return () => { window.clearInterval(timer); document.removeEventListener('visibilitychange', refresh); };
+  }, [todayKey]);
   const notifications = useMemo(() => {
     const today = new Date();
     const phase = phaseLine(currentPhaseName, today);
@@ -39,11 +56,13 @@ export const Header: React.FC<HeaderProps> = ({
       water,
       { id: 'evening', title: 'Akşam sana kalsın', time: 'Akşam', desc: eveningLine(today), type: 'pms_calm' },
     ].map((item) => ({ ...item, read: readIds.includes(item.id) }));
-  }, [currentCycleDay, currentPhaseName, waterRemaining, readIds]);
+  }, [currentCycleDay, currentPhaseName, waterRemaining, readIds, todayKey]);
 
   const markAllAsRead = () => {
     soundEngine.playDropletSound();
-    setReadIds(notifications.map((item) => item.id));
+    const ids = notifications.map((item) => item.id);
+    setReadIds(ids);
+    try { localStorage.setItem('flora-notes-read', JSON.stringify({ date: todayKey, ids })); } catch { /* Keep this session readable if storage is unavailable. */ }
   };
 
   const unreadCount = notifications.filter((n) => !n.read).length;
@@ -73,7 +92,6 @@ export const Header: React.FC<HeaderProps> = ({
             <button
               onClick={() => {
                 soundEngine.playDropletSound();
-                void askNotifyPermission();
                 setShowNotifications(!showNotifications);
               }}
               className="w-9 h-9 rounded-full bg-white flex items-center justify-center text-[#805062] hover:text-[#b0004a] hover:bg-pink-50 active:scale-95 transition-all relative cursor-pointer border border-pink-100 shadow-xs"
@@ -88,17 +106,7 @@ export const Header: React.FC<HeaderProps> = ({
             </button>
           </div>
 
-          {/* Settings Icon Button (Replaces profile picture button) */}
-          <button
-            onClick={() => {
-              soundEngine.playDropletSound();
-              setActiveTab('profil');
-            }}
-            title="Profil"
-            className="w-9 h-9 rounded-full bg-white flex items-center justify-center text-[#805062] hover:text-[#b0004a] hover:bg-pink-50 active:rotate-45 transition-all cursor-pointer border border-pink-100 shadow-xs"
-          >
-            <Settings className="w-4 h-4" />
-          </button>
+
         </div>
       </div>
 

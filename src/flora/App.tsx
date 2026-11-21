@@ -75,17 +75,6 @@ function normalizeDays(raw: Record<string, DayInfo> | null): Record<string, DayI
   return out;
 }
 
-function inQuietHours(start: string, end: string, now: Date): boolean {
-  const [startHour, startMin] = start.split(':').map(Number);
-  const [endHour, endMin] = end.split(':').map(Number);
-  if ([startHour, startMin, endHour, endMin].some((part) => Number.isNaN(part))) return false;
-  const minutes = now.getHours() * 60 + now.getMinutes();
-  const from = startHour * 60 + startMin;
-  const to = endHour * 60 + endMin;
-  if (from === to) return false;
-  if (from < to) return minutes >= from && minutes < to;
-  return minutes >= from || minutes < to;
-}
 function readStore<T>(key: string, fallback: T): T {
   if (typeof window === 'undefined') return fallback;
   try {
@@ -216,7 +205,7 @@ export default function App() {
     if (!ready) return;
     let current = true;
     const run = () => {
-      void syncReminders(supplements).then(
+      void syncReminders(supplements, profile).then(
         () => { if (current) setReminderError(false); },
         () => { if (current) setReminderError(true); },
       );
@@ -228,22 +217,7 @@ export default function App() {
       current = false;
       document.removeEventListener('visibilitychange', refresh);
     };
-  }, [ready, supplements]);
-
-  useEffect(() => {
-    if (!ready) return;
-    const pending = supplements.filter((item) => item.reminderEnabled && !item.taken);
-    if (!pending.length) return;
-    if (inQuietHours(profile.quietHoursStart, profile.quietHoursEnd, new Date())) return;
-    const today = toLocalISO(new Date());
-    try {
-      if (sessionStorage.getItem('flora-supp-ping') === today) return;
-      sessionStorage.setItem('flora-supp-ping', today);
-    } catch {
-      return;
-    }
-    showToast('Küçük bir hatırlatma', `İstersen işaretle: ${pending.map((item) => item.name).join(', ')}.`, 'info');
-  }, [ready, supplements, profile.quietHoursStart, profile.quietHoursEnd]);
+  }, [ready, supplements, profile.quietHoursStart, profile.quietHoursEnd, profile.reminderIntervalMin]);
 
   // Toast Notification Helper
   const showToast = (title: string, message: string, type: 'success' | 'info' | 'water' = 'info') => {

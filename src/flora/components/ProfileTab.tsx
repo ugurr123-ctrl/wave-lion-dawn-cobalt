@@ -483,7 +483,7 @@ export const ProfileTab: React.FC<ProfileTabProps> = ({
           <div>
             <p className="text-xs font-bold text-[#1f1a1c]">Bildirim izni</p>
             <p className="text-[11px] text-[#805062]">
-              {notify === 'granted' ? 'İzin açık. Sabah 9 ve seçtiğin takviye saatleri için hatırlatma ayarlayabilirsin.' : notify === 'denied' ? 'Kapalı. Telefon ayarından açabilirsin.' : notify === 'unsupported' ? 'Kurulu Floria uygulamasında sorulur. Tarayıcıda gelmez.' : 'Henüz sorulmadı.'}
+              {notify === 'granted' ? 'İzin açık. Su molaları, günlük tatlı notlar ve seçtiğin takviye saatlerinde hatırlatılır. Su ve günlük notlar sessiz saatlerde gelmez.' : notify === 'denied' ? 'Kapalı. Telefon ayarından açabilirsin.' : notify === 'unsupported' ? 'Kurulu Floria uygulamasında sorulur. Tarayıcıda gelmez.' : 'Henüz sorulmadı.'}
             </p>
           </div>
           {reminderError && <p role="alert" className="text-xs text-rose-800">Hatırlatıcı kurulamadı. Tekrar dene.</p>}
@@ -492,7 +492,7 @@ export const ProfileTab: React.FC<ProfileTabProps> = ({
               type="button"
               onClick={() => {
                 onReminderError(false);
-                void askNotifyPermission(supplements).then(setNotify).catch(() => onReminderError(true));
+                void askNotifyPermission(supplements, profile).then(setNotify).catch(() => onReminderError(true));
               }}
               className="shrink-0 px-3 py-1.5 rounded-full bg-[#1f1a1c] text-white text-xs font-bold cursor-pointer"
             >
