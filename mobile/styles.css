@@ -31,3 +31,34 @@ html { background: #fff8f8; }
   pointer-events: none;
 }
 #root header.sticky { background: #fff8f8; }
+
+/* One responsive shell for content, header, and navigation. */
+.floria-shell, .floria-header-content, .floria-nav-content { width: 100%; max-width: 28rem; }
+.floria-shell { min-height: 100dvh; }
+body { min-height: 100dvh; }
+#root .fixed.inset-0.z-50 {
+  padding-top: max(1rem, env(safe-area-inset-top, 0px));
+  padding-bottom: max(1rem, env(safe-area-inset-bottom, 0px));
+  overflow-y: auto;
+}
+#root .fixed.inset-0.z-50 > div {
+  max-height: calc(100dvh - max(2rem, env(safe-area-inset-top, 0px)) - env(safe-area-inset-bottom, 0px));
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+#root input { min-width: 0; max-width: 100%; }
+@media (min-width: 768px) {
+  .floria-shell, .floria-header-content, .floria-nav-content { max-width: 72rem; }
+  .floria-shell { padding-inline: 2rem; }
+  .floria-tab-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1.5rem; align-items: start; }
+  .floria-tab-grid > * { min-width: 0; margin-block: 0 !important; }
+  .floria-tab-grid > :first-child, .floria-tab-grid > .floria-tab-heading { grid-column: 1 / -1; }
+  .floria-tab-grid > .fixed { grid-column: auto; }
+  .floria-today-grid > :nth-child(2) { grid-row: span 2; }
+  .floria-header-content { padding-inline: 1rem; }
+  .floria-nav-content { max-width: 48rem; }
+  .floria-nav-content button { min-height: 3.5rem; min-width: 4rem; }
+}
+@media (prefers-reduced-motion: reduce) {
+  #root *, #root *::before, #root *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; }
+}

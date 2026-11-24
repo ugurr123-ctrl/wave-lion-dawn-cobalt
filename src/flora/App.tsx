@@ -403,7 +403,7 @@ export default function App() {
       <div className="fixed inset-0 topographic-pattern pointer-events-none" />
 
       {/* Main Container */}
-      <div className="relative z-10 max-w-md mx-auto min-h-screen flex flex-col px-4">
+      <div className="floria-shell relative z-10 mx-auto min-h-screen flex flex-col px-4">
         {/* App Header */}
         <Header
           currentCycleDay={profile.lastPeriodDate ? currentDayInfo.cycleDay : undefined}

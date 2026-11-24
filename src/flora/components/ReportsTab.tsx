@@ -121,7 +121,7 @@ export const ReportsTab: React.FC<ReportsTabProps> = ({
   };
 
   return (
-    <div className="space-y-4 pb-40 pt-2 select-none text-[#1f1a1c]">
+    <div className="floria-tab-grid space-y-4 pb-40 pt-2 select-none text-[#1f1a1c]">
       {/* Top Header & PDF Action */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">

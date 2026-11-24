@@ -180,9 +180,9 @@ export function getMoodComfortAdvice(
 
   // 4. CANLI / ENERJİK / MUTLU (Foliküler & Ovülasyon Zirvesi)
   return {
-    title: '✨ Zirve Biyo-Vitalite & Yaratıcı Güç',
-    subtitle: 'Östrojen ve mutluluk hormonların tepe noktasında! Yüksek motivasyonunu yeni projelere ve sevdiklerine aktar.',
-    tag: 'Zirve Enerji',
+    title: '🌸 Bugünkü ruh halin',
+    subtitle: 'İyi hissettiğin anların tadını çıkar. Ruh halin gün içinde değişebilir; kendine alan bırak.',
+    tag: 'Kendine nazik ol',
     colorTheme: 'from-amber-400/15 via-rose-50/50 to-emerald-50/30 border-amber-200 text-amber-950',
     soothingTechnique: 'Dinamik 15 dakikalık yürüyüş veya dans. Artan enerjiyi endorfin patlamasına dönüştür.',
     herbalDrink: 'Matcha veya Taze Nane & Limonlu canlı su. Hücresel odaklanmayı berraklaştırır.',

@@ -223,7 +223,7 @@ export const TodayTab: React.FC<TodayTabProps> = ({
   });
 
   return (
-    <div className="space-y-4 pb-40 pt-2 select-none text-[#1f1a1c]">
+    <div className="floria-today-grid floria-tab-grid space-y-4 pb-40 pt-2 select-none text-[#1f1a1c]">
       {/* GREETING & PHASE BADGES */}
       <section className="flex flex-col gap-2 pt-1">
         <div className="flex items-center justify-between">
@@ -310,7 +310,7 @@ export const TodayTab: React.FC<TodayTabProps> = ({
 
         {/* 4-7-8 Breathing Calming Mechanism */}
         <div className="p-3.5 rounded-2xl bg-white/90 border border-pink-100/80 shadow-xs space-y-2">
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between gap-3 flex-wrap">
             <div className="flex items-center gap-2">
               <Wind className="w-4 h-4 text-[#d81b60]" />
               <span className="text-xs font-bold text-[#1f1a1c]">
@@ -559,7 +559,7 @@ export const TodayTab: React.FC<TodayTabProps> = ({
           disabled={lastPeriodDate === toLocalISO(new Date())}
           className="w-full mt-2 py-3 px-4 rounded-full border border-pink-200 bg-white text-[#b0004a] text-xs font-bold cursor-pointer disabled:opacity-60 disabled:cursor-default"
         >
-          {lastPeriodDate === toLocalISO(new Date()) ? 'Bugün 1. gün' : 'Adetim başladı'}
+          {lastPeriodDate === toLocalISO(new Date()) ? 'Bugün periyodumun birinci günü' : 'Periyodumun birinci günü'}
         </button>
       </section>
 

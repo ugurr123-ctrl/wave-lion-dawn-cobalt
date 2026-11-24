@@ -395,7 +395,7 @@ export function GuideHub({ phase, cycleDay, cycleLength, periodLength, lastPerio
   }
 
   return (
-    <section className="space-y-7 pb-40">
+    <section className="floria-tab-grid space-y-7 pb-40">
       <button
         onClick={() => {
           soundEngine.playDropletSound();

@@ -26,6 +26,7 @@ import { UserProfile, SupplementItem, defaultPartnerShare, PartnerShareKey, PART
 import { FloraLogo } from './FloraLogo';
 import { soundEngine } from '../utils/audio';
 import { triggerRosePollenBurst } from '../utils/confetti';
+import { prepareProfilePhoto } from '../utils/profilePhoto';
 import { askNotifyPermission, readNotifyState, type NotifyState } from '../notifications';
 
 interface ProfileTabProps {
@@ -83,27 +84,32 @@ export const ProfileTab: React.FC<ProfileTabProps> = ({
   const [editPeriodLen, setEditPeriodLen] = useState<number>(profile.periodLength || 5);
 
   const fileInputRef = useRef<HTMLInputElement | null>(null);
+  const [photoBusy, setPhotoBusy] = useState(false);
+  const [photoError, setPhotoError] = useState('');
 
   const defaultAvatar = '/logo.png';
   const currentAvatar = profile.avatarUrl || defaultAvatar;
 
-  const presetAvatars: { id: string; url: string; label: string }[] = [];
 
-  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onload = () => {
-        if (typeof reader.result === 'string') {
-          soundEngine.playCrystalChime();
-          triggerRosePollenBurst();
-          onUpdateProfile({ avatarUrl: reader.result });
-          setShowAvatarModal(false);
-          showToast('Profil Fotoğrafı Güncellendi 🌸', 'Yeni avatarınız başarıyla yüklendi.', 'success');
-        }
-      };
-      reader.readAsDataURL(file);
-    }
+    e.target.value = '';
+    if (!file || photoBusy) return;
+    setPhotoBusy(true);
+    setPhotoError('');
+    try {
+      const avatarUrl = await prepareProfilePhoto(file);
+      // Check storage before reporting success; never replace the previous photo on failure.
+      const saved = { ...profile, avatarUrl };
+      localStorage.setItem('flora-profile', JSON.stringify(saved));
+      onUpdateProfile({ avatarUrl });
+      setShowAvatarModal(false);
+      showToast('Profil fotoğrafı güncellendi', 'Fotoğraf bu cihazda kaydedildi.', 'success');
+    } catch (error) {
+      setPhotoError(error instanceof DOMException && error.name === 'QuotaExceededError'
+        ? 'Cihazda fotoğraf için yer kalmadı. Biraz alan açıp tekrar dene.'
+        : error instanceof Error ? error.message : 'Fotoğraf kaydedilemedi. Tekrar dene.');
+    } finally { setPhotoBusy(false); }
   };
 
   const handleSliderChange = (val: number) => {
@@ -138,7 +144,7 @@ export const ProfileTab: React.FC<ProfileTabProps> = ({
     soundEngine.playCrystalChime();
     onUpdateProfile({ quietHoursStart: bedtime, quietHoursEnd: waketime });
     setShowSleepModal(false);
-    showToast('Sessiz saat', `${bedtime}–${waketime} arasında takviye hatırlatması çıkmaz.`, 'success');
+    showToast('Sessiz saat', `${bedtime}–${waketime} arasında su ve günlük not hatırlatması çıkmaz. Takviyeler seçtiğin saatte hatırlatılır.`, 'success');
   };
 
   const handleSaveCycleParams = (e: React.FormEvent) => {
@@ -150,17 +156,20 @@ export const ProfileTab: React.FC<ProfileTabProps> = ({
   };
 
   return (
-    <div className="space-y-5 pb-40 pt-2 select-none text-[#1f1a1c]">
+    <div className="floria-tab-grid space-y-5 pb-40 pt-2 select-none text-[#1f1a1c]">
       <input
         type="file"
         ref={fileInputRef}
         accept="image/*"
         onChange={handleImageUpload}
+        disabled={photoBusy}
         className="hidden"
       />
 
+      {photoError && <p role="alert" className="rounded-xl bg-rose-100 p-3 text-sm text-rose-950">{photoError}</p>}
+      {photoBusy && <p role="status" className="text-sm">Fotoğraf hazırlanıyor…</p>}
       {/* Top Header Bar (No Apple Health mention) */}
-      <div className="flex items-center justify-between">
+      <div className="floria-tab-heading flex items-center justify-between">
         <div className="flex items-center gap-2">
           <FloraLogo size="sm" />
           <span className="text-sm font-extrabold text-[#1f1a1c]">
@@ -665,41 +674,15 @@ export const ProfileTab: React.FC<ProfileTabProps> = ({
             </div>
 
             <button
-              onClick={() => fileInputRef.current?.click()}
+              onClick={() => { setPhotoError(''); fileInputRef.current?.click(); }}
+              disabled={photoBusy}
               className="w-full py-3 px-4 rounded-2xl bg-gradient-to-r from-[#b0004a] to-[#d81b60] text-white font-bold text-xs shadow-md flex items-center justify-center gap-2 active:scale-98 transition-all cursor-pointer"
             >
               <Camera className="w-4 h-4" />
-              <span>Cihazdan Fotoğraf Seç & Yükle</span>
+              <span>{photoBusy ? 'Fotoğraf hazırlanıyor…' : 'Fotoğraf çek veya cihazdan seç'}</span>
             </button>
+            {photoError && <p role="alert" className="text-sm text-rose-800">{photoError}</p>}
 
-            <div className="space-y-2">
-              <span className="text-[11px] font-bold text-[#805062] block">
-                Veya Hazır Avatarlardan Seç:
-              </span>
-              <div className="grid grid-cols-4 gap-2">
-                {presetAvatars.map((av) => (
-                  <button
-                    key={av.id}
-                    onClick={() => {
-                      soundEngine.playDropletSound();
-                      onUpdateProfile({ avatarUrl: av.url });
-                      setShowAvatarModal(false);
-                      showToast('Avatar Seçildi', `${av.label} profil fotoğrafınız oldu.`, 'success');
-                    }}
-                    className="p-1 rounded-2xl border border-pink-100 hover:border-[#d81b60] transition-all cursor-pointer flex flex-col items-center gap-1 group"
-                  >
-                    <img
-                      src={av.url}
-                      alt={av.label}
-                      className="w-12 h-12 rounded-full object-cover group-hover:scale-105 transition-transform"
-                    />
-                    <span className="text-[9px] font-semibold text-[#805062] truncate w-full text-center">
-                      {av.label.split(' ')[0]}
-                    </span>
-                  </button>
-                ))}
-              </div>
-            </div>
 
             <button
               onClick={() => setShowAvatarModal(false)}

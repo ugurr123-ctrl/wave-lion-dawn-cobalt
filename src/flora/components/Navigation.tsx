@@ -44,7 +44,7 @@ export const Navigation: React.FC<NavigationProps> = ({ activeTab, setActiveTab,
 
   return (
     <nav className="fixed bottom-0 left-0 right-0 z-40 pb-safe pointer-events-none">
-      <div className="max-w-md mx-auto px-4 pb-3">
+      <div className="floria-nav-content mx-auto px-4 pb-3">
         <AdBanner premium={premium} onRemove={() => setActiveTab('profil')} />
         <div className="pointer-events-auto bg-white/95 backdrop-blur-xl rounded-full py-2 px-3 shadow-[0_12px_36px_rgba(216,27,96,0.18)] border border-pink-100 flex items-center justify-around">
           {tabs.map((tab) => {
@@ -55,7 +55,7 @@ export const Navigation: React.FC<NavigationProps> = ({ activeTab, setActiveTab,
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
-                className={`relative flex flex-col items-center justify-center transition-all duration-200 cursor-pointer select-none ${
+                className={`relative min-h-11 min-w-11 flex flex-col items-center justify-center transition-all duration-200 cursor-pointer select-none ${
                   isActive
                     ? 'text-white'
                     : 'text-[#805062] hover:text-[#b0004a]'

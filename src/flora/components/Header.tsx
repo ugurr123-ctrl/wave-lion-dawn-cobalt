@@ -68,8 +68,8 @@ export const Header: React.FC<HeaderProps> = ({
   const unreadCount = notifications.filter((n) => !n.read).length;
 
   return (
-    <header className="sticky top-0 z-40 bg-[#fff8f8]/95 backdrop-blur-md border-b border-[#f6ebed] transition-all">
-      <div className="max-w-md mx-auto px-4 h-16 flex items-center justify-between relative">
+    <header className="sticky top-0 z-40 bg-[#fff8f8]/95 border-b border-[#f6ebed] transition-all">
+      <div className="floria-header-content mx-auto px-4 h-16 flex items-center justify-between relative">
         {/* Left: Authentic 3D Lotus Logo & Clean Title (No "Gün 14" badge) */}
         <div className="flex items-center gap-2.5">
           <FloraLogo size="md" />
