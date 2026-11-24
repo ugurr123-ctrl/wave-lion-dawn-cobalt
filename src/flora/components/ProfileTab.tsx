@@ -168,16 +168,6 @@ export const ProfileTab: React.FC<ProfileTabProps> = ({
 
       {photoError && <p role="alert" className="rounded-xl bg-rose-100 p-3 text-sm text-rose-950">{photoError}</p>}
       {photoBusy && <p role="status" className="text-sm">Fotoğraf hazırlanıyor…</p>}
-      {/* Top Header Bar (No Apple Health mention) */}
-      <div className="floria-tab-heading flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <FloraLogo size="sm" />
-          <span className="text-sm font-extrabold text-[#1f1a1c]">
-            Profil
-          </span>
-        </div>
-      </div>
-
       {/* HERO PROFILE CLAY CARD */}
       <div className="w-full bg-white rounded-3xl p-5 clay-card shadow-[0_12px_32px_rgba(216,27,96,0.08)] border border-white relative overflow-hidden">
         <div className="flex items-center gap-4 mb-4 relative z-10">

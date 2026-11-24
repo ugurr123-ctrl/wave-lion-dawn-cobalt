@@ -15,7 +15,6 @@ import {
   Coffee
 } from 'lucide-react';
 import { DayInfo, CyclePhase } from '../types';
-import { FloraLogo } from './FloraLogo';
 import { soundEngine } from '../utils/audio';
 import { triggerRosePollenBurst } from '../utils/confetti';
 import { calculateConceptionProbability } from '../utils/cycleIntelligence';
@@ -115,12 +114,8 @@ export const CycleTab: React.FC<CycleTabProps> = ({
       {/* Sub-Header Bar */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <FloraLogo size="md" />
           <div>
             <div className="flex items-center gap-1.5">
-              <span className="text-xs font-bold text-[#805062] uppercase tracking-wider block">
-                Floria
-              </span>
               <span className="text-[10px] px-2 py-0.2 rounded-full bg-pink-100 text-[#b0004a] font-bold">
                 Biyo-Takvim
               </span>

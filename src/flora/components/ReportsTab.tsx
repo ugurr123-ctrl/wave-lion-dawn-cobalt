@@ -6,7 +6,6 @@ import {
   Download,
   Share2
 } from 'lucide-react';
-import { FloraLogo } from './FloraLogo';
 import { soundEngine } from '../utils/audio';
 import { triggerRosePollenBurst } from '../utils/confetti';
 import { DayInfo, CycleRecord } from '../types';
@@ -125,7 +124,6 @@ export const ReportsTab: React.FC<ReportsTabProps> = ({
       {/* Top Header & PDF Action */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <FloraLogo size="md" />
           <div>
             <div className="flex items-center gap-2 mb-0.5">
               <span className="text-xs font-black uppercase tracking-wider text-transparent bg-clip-text bg-gradient-to-r from-[#b0004a] to-amber-600">
